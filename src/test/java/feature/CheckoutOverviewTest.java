@@ -33,7 +33,6 @@ public class CheckoutOverviewTest extends BaseTest {
         cart.clickCheckout();
 
         checkoutInformation.fillFormAndContinue("Hong", "Nhung", "12345");
-        checkoutInformation.clickContinue();
     }
 
     @Test
@@ -69,8 +68,34 @@ public class CheckoutOverviewTest extends BaseTest {
     @Test
     public void testCancelReturnsToCartWithItems() {
         checkoutOverview.clickCancel();
-        Assert.assertTrue(driver.getCurrentUrl().contains("cart.html"), "Did not return to the cart page after clicking Cancel.");
+        Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"), "Did not return to the inventory page after clicking Cancel.");
         List<Double> prices = cart.getItemPrices();
         Assert.assertFalse(prices.isEmpty(), "Cart is empty after clicking Cancel, but items were expected.");
+    }
+
+    @Test
+    public void testAllProductNamesAreDisplayedInOverview() {
+        List<String> expectedProductNames = List.of(
+                "Sauce Labs Backpack",
+                "Sauce Labs Bike Light",
+                "Sauce Labs Bolt T-Shirt",
+                "Sauce Labs Fleece Jacket",
+                "Sauce Labs Onesie",
+                "Test.allTheThings() T-Shirt (Red)"
+        );
+
+        List<String> actualProductNames = checkoutOverview.getProductNames();
+
+        System.out.println("Expected: " + expectedProductNames.size() + " items");
+        System.out.println("Actual: " + actualProductNames.size() + " items");
+        for (String name : actualProductNames) {
+            System.out.println(name);
+        }
+
+        Assert.assertEqualsNoOrder(
+                actualProductNames.toArray(),
+                expectedProductNames.toArray(),
+                "Not all expected product names are displayed on the overview page."
+        );
     }
 }

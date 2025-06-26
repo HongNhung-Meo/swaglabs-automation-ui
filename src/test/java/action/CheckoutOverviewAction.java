@@ -1,6 +1,7 @@
 package action;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -66,10 +67,13 @@ public class CheckoutOverviewAction {
     }
 
     public List<String> getProductNames() {
-        List<WebElement> nameElements = driver.findElements(CheckoutOverviewPage.NAME_ITEM_LIST);
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(CheckoutOverviewPage.NAME_ITEM_LIST));
+
+        List<WebElement> elements = driver.findElements(CheckoutOverviewPage.NAME_ITEM_LIST);
         List<String> names = new ArrayList<>();
-        for (WebElement element : nameElements) {
-            names.add(element.getText());
+        for (WebElement el : elements) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", el);
+            names.add(el.getText());
         }
         return names;
     }

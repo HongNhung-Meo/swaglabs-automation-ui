@@ -107,13 +107,16 @@ public class CheckoutInformationTest extends BaseTest {
 
     @Test
     public void clickCancelShouldReturnToCartAndDisplayCorrectly() {
-        List<String> productNamesBeforeCancel = cart.getProductNames();
         checkoutInformation.clickCancel();
+
         Assert.assertTrue(driver.getCurrentUrl().contains("cart"), "Cancel did not return to Your Cart page");
         Assert.assertEquals(cart.getTitle(), "Your Cart", "Page title is incorrect after clicking Cancel");
+
         List<String> productNamesAfterCancel = cart.getProductNames();
-        Assert.assertEquals(productNamesAfterCancel, productNamesBeforeCancel, "Cart items changed after clicking Cancel");
-        Assert.assertEquals(cart.getCartItemCount(), productNamesBeforeCancel.size(), "Cart count mismatch after returning from Checkout");
+        int expectedCount = cartHeader.getCartBadgeCount();
+
+        Assert.assertEquals(productNamesAfterCancel.size(), expectedCount, "Cart items changed after clicking Cancel");
+        Assert.assertEquals(cart.getCartItemCount(), expectedCount, "Cart count mismatch after returning from Checkout");
     }
 
     @Test

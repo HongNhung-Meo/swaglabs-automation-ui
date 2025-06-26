@@ -6,8 +6,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import untils.BaseTest;
 
-import java.util.List;
-
 public class CheckoutCompleteTest extends BaseTest {
     LoginAction login;
     InventoryAction inventory;
@@ -32,8 +30,6 @@ public class CheckoutCompleteTest extends BaseTest {
         cartHeader.openCart();
         cart.clickCheckout();
         checkoutInformation.fillFormAndContinue("Hong", "Nhung", "12345");
-        checkoutInformation.clickContinue();
-
         checkoutOverview.clickFinish();
 
         checkoutComplete = new CheckoutCompleteAction(driver);
@@ -52,25 +48,5 @@ public class CheckoutCompleteTest extends BaseTest {
     public void testBackHomeRedirectsToInventory() {
         checkoutComplete.clickBackHome();
         Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"), "Did not redirect to inventory page after Back Home.");
-    }
-
-    @Test
-    public void testAllProductNamesAreDisplayedInOverview() {
-        List<String> expectedProductNames = List.of(
-                "Sauce Labs Backpack",
-                "Sauce Labs Bike Light",
-                "Sauce Labs Bolt T-Shirt",
-                "Sauce Labs Fleece Jacket",
-                "Sauce Labs Onesie",
-                "Test.allTheThings() T-Shirt (Red)"
-        );
-
-        List<String> actualProductNames = checkoutOverview.getProductNames();
-
-        Assert.assertEqualsNoOrder(
-                actualProductNames.toArray(),
-                expectedProductNames.toArray(),
-                "Not all expected product names are displayed on the overview page."
-        );
     }
 }
