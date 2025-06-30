@@ -20,7 +20,7 @@ public class LoginTest extends BaseTest {
         loginAction = new LoginAction(driver);
     }
 
-    public void inputData(String user, String pass) {
+    public void fillLoginData(String user, String pass) {
         loginAction.enterUsername(user);
         loginAction.enterPassword(pass);
     }
@@ -45,7 +45,7 @@ public class LoginTest extends BaseTest {
         String expectedResult = rowData.get("ExpectedResult");
         String errorMsg = rowData.get("ExpectedErrorMessage");
 
-        inputData(userName, passWord);
+        fillLoginData(userName, passWord);
         loginAction.clickLogin();
 
         if ("success".equals(expectedResult)) {

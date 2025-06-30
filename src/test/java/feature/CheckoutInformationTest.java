@@ -34,7 +34,7 @@ public class CheckoutInformationTest extends BaseTest {
         cart.clickCheckout();
     }
 
-    public void inputData(String first, String last, String zip) {
+    public void fillCheckoutDataInfor(String first, String last, String zip) {
         checkoutInformation.enterFirstName(first);
         checkoutInformation.enterLastName(last);
         checkoutInformation.enterZipCode(zip);
@@ -61,7 +61,7 @@ public class CheckoutInformationTest extends BaseTest {
         String expectedResult = rowData.get("ExpectedResult");
         String expectedErrorMsg = rowData.get("ExpectedErrorMessage");
 
-        inputData(firstName, lastName, zipCode);
+        fillCheckoutDataInfor(firstName, lastName, zipCode);
         checkoutInformation.clickContinue();
 
         boolean isStepTwoPage;
@@ -121,7 +121,7 @@ public class CheckoutInformationTest extends BaseTest {
 
     @Test
     public void testWhitespaceInput_AllFields() {
-        inputData("   ", "   ", "   ");
+        fillCheckoutDataInfor("   ", "   ", "   ");
         checkoutInformation.clickContinue();
 
         if (driver.getCurrentUrl().contains("checkout-step-two")) {

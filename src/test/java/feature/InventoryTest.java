@@ -31,7 +31,7 @@ public class InventoryTest extends BaseTest {
         driver.navigate().refresh();
     }
 
-    @Test
+    @Test (description = "Kiểm tra tiêu đề")
     public void checkPageLoadedSuccessfully() {
         Assert.assertEquals(inventory.getTitle(), "Products", "Page title is incorrect");
     }
