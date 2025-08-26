@@ -1,11 +1,11 @@
 package action;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import ui.InventoryPage;
+import ui.InventoryPageUI;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -20,74 +20,161 @@ public class InventoryAction {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    public String getTitle() {
-        return driver.findElement(InventoryPage.PAGE_TITLE).getText();
+    public boolean isLogoDisplayed() {
+        return driver.findElement(InventoryPageUI.APP_LOGO).isDisplayed();
     }
 
-    public int getAllInventoryItemCount() {
-        return driver.findElements(InventoryPage.INVENTORY_ITEM).size();
+    public String getPageTitle() {
+        return driver.findElement(InventoryPageUI.TITLE).getText();
     }
 
-    public List<String> getAllProductNames() {
-        return getTextListFromElements(InventoryPage.NAME_ITEM_LIST);
+    public boolean isSortDropdownDisplayed() {
+        return driver.findElement(InventoryPageUI.SORT_DROPDOWN).isDisplayed();
     }
 
-    public List<String> getAllProductDescriptions() {
-        return getTextListFromElements(InventoryPage.DESC_ITEM_LIST);
+    public List<String> getAllItemNames() {
+        List<String> names = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            names.add(item.findElement(InventoryPageUI.ITEM_NAME).getText());
+        }
+        return names;
     }
 
-    public List<Double> getAllProductPrices() {
-        List<WebElement> priceElements = driver.findElements(InventoryPage.PRICE_ITEM_LIST);
-        List<Double> prices = new ArrayList<>();
-        for (WebElement el : priceElements) {
-            prices.add(Double.parseDouble(el.getText().replace("$", "").trim()));
+    public List<String> getAllItemDescriptions() {
+        List<String> descs = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            descs.add(item.findElement(InventoryPageUI.ITEM_DESC).getText());
+        }
+        return descs;
+    }
+
+    public List<String> getAllItemPrices() {
+        List<String> prices = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            prices.add(item.findElement(InventoryPageUI.ITEM_PRICE).getText());
         }
         return prices;
     }
 
-    private List<String> getTextListFromElements(By locator) {
-        List<WebElement> elements = driver.findElements(locator);
-        List<String> texts = new ArrayList<>();
-        for (WebElement el : elements) {
-            texts.add(el.getText());
+    public List<Boolean> getAllItemImagesDisplayed() {
+        List<Boolean> imagesDisplayed = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            imagesDisplayed.add(item.findElement(InventoryPageUI.ITEM_IMAGE).isDisplayed());
         }
-        return texts;
+        return imagesDisplayed;
     }
 
-    public void selectSortOption(String value) {
-        try {
-            Select dropdown = new Select(driver.findElement(InventoryPage.PRODUCT_SORT_DROPDOWN));
-            dropdown.selectByValue(value);
-        } catch (Exception e) {
-            throw new RuntimeException("Sort option failed: " + value, e);
+    public List<Boolean> areAllButtonsDisplayed() {
+        List<Boolean> displayedList = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            displayedList.add(item.findElement(InventoryPageUI.ADD_REMOVE_BUTTON).isDisplayed());
+        }
+        return displayedList;
+    }
+
+    private List<WebElement> getInventoryItems() {
+        return driver.findElements(InventoryPageUI.INVENTORY_ITEMS);
+    }
+
+    private WebElement getItemByName(String productName) {
+        return getInventoryItems().stream().filter(item -> item.findElement(InventoryPageUI.ITEM_NAME).getText().equalsIgnoreCase(productName)).findFirst().orElseThrow(() -> new RuntimeException("Product not found: " + productName));
+    }
+
+    // ================= Business Add =================
+
+    public void addProductByName(String productName) {
+        WebElement item = getItemByName(productName);
+        WebElement btn = item.findElement(InventoryPageUI.ADD_REMOVE_BUTTON);
+        if (btn.getText().equals("Add to cart")) {
+            wait.until(ExpectedConditions.elementToBeClickable(btn)).click();
+        }
+    }
+
+    public void addProductsByNames(List<String> productNames) {
+        for (String name : productNames) {
+            addProductByName(name);
         }
     }
 
     public void addAllProducts() {
-        List<WebElement> buttons = driver.findElements(InventoryPage.ADD_BUTTONS);
-        for (WebElement btn : buttons) {
-            btn.click();
+        clickAllButtonsWithText("Add to cart");
+    }
+
+    // ================= Business Remove =================
+
+    public void removeProductByName(String productName) {
+        WebElement item = getItemByName(productName);
+        WebElement btn = item.findElement(InventoryPageUI.ADD_REMOVE_BUTTON);
+        if (btn.getText().equals("Remove")) {
+            wait.until(ExpectedConditions.elementToBeClickable(btn)).click();
+        }
+    }
+
+    public void removeProductsByNames(List<String> productNames) {
+        for (String name : productNames) {
+            removeProductByName(name);
         }
     }
 
     public void removeAllProducts() {
-        List<WebElement> buttons = driver.findElements(InventoryPage.REMOVE_BUTTONS);
-        for (WebElement btn : buttons) {
-            btn.click();
+        clickAllButtonsWithText("Remove");
+    }
+
+    // ================= Helpers =================
+
+    private void clickAllButtonsWithText(String expectedText) {
+        for (WebElement item : getInventoryItems()) {
+            WebElement btn = item.findElement(InventoryPageUI.ADD_REMOVE_BUTTON);
+            if (btn.getText().equals(expectedText)) {
+                wait.until(ExpectedConditions.elementToBeClickable(btn)).click();
+            }
         }
     }
 
-    public void addFirstProduct() {
-        List<WebElement> buttons = driver.findElements(InventoryPage.ADD_BUTTONS);
-        if (!buttons.isEmpty()) buttons.get(0).click();
+    public String getButtonTextByProduct(String productName) {
+        WebElement item = getItemByName(productName);
+        return item.findElement(InventoryPageUI.ADD_REMOVE_BUTTON).getText();
     }
 
-    public void removeFirstProduct() {
-        List<WebElement> buttons = driver.findElements(InventoryPage.REMOVE_BUTTONS);
-        if (!buttons.isEmpty()) buttons.get(0).click();
+    public List<String> getAllButtonTexts() {
+        List<String> btnTexts = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            btnTexts.add(item.findElement(InventoryPageUI.ADD_REMOVE_BUTTON).getText());
+        }
+        return btnTexts;
     }
 
-    public List<String> getAllAddRemoveButtonTexts() {
-        return getTextListFromElements(InventoryPage.ADD_REMOVE_BUTTON);
+    public void selectSortOption(String optionText) {
+        WebElement dropdown = wait.until(ExpectedConditions.visibilityOfElementLocated(InventoryPageUI.SORT_DROPDOWN));
+        Select select = new Select(dropdown);
+        select.selectByVisibleText(optionText);
+    }
+
+    public List<String> getAllProductNames() {
+        List<String> names = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            names.add(item.findElement(InventoryPageUI.ITEM_NAME).getText());
+        }
+        return names;
+    }
+
+    public List<Double> getAllProductPrices() {
+        List<Double> prices = new ArrayList<>();
+        for (WebElement item : getInventoryItems()) {
+            String priceText = item.findElement(InventoryPageUI.ITEM_PRICE).getText().replace("$", "");
+            prices.add(Double.parseDouble(priceText));
+        }
+        return prices;
+    }
+
+    public List<String> getAllOptionsFromSortDropdown() {
+        WebElement dropdown = wait.until(ExpectedConditions.visibilityOfElementLocated(InventoryPageUI.SORT_DROPDOWN));
+        Select select = new Select(dropdown);
+        List<WebElement> options = select.getOptions();
+        List<String> optionTexts = new ArrayList<>();
+        for (WebElement option : options) {
+            optionTexts.add(option.getText().trim());
+        }
+        return optionTexts;
     }
 }

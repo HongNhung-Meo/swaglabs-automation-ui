@@ -1,28 +1,46 @@
 package feature;
 
 import action.LoginAction;
+import io.qameta.allure.*;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 import untils.BaseTest;
 import untils.ExcelUntils;
 
 import java.util.List;
 import java.util.Map;
 
+@Epic("Authentication")
+@Feature("Login Feature")
 public class LoginTest extends BaseTest {
-    LoginAction loginAction;
+    LoginAction login;
 
     @BeforeMethod
     public void setupPage() {
-        loginAction = new LoginAction(driver);
+        login = new LoginAction(driver);
     }
 
+    @Step("Điền username: {0} và password: {1}")
     public void fillLoginData(String user, String pass) {
-        loginAction.enterUsername(user);
-        loginAction.enterPassword(pass);
+        login.enterUsername(user);
+        login.enterPassword(pass);
+    }
+    @Test(description = "Kiểm tra hiển thị của các item")
+    @Story("Kiểm tra UI của trang Login")
+    @Severity(SeverityLevel.NORMAL)
+    public void verifyLoginUIElementsDisplayed() {
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertTrue(login.isLogoDisplayed(), "Logo không hiển thị");
+        softAssert.assertTrue(login.isUsernameDisplayed(), "Username không hiển thị");
+        softAssert.assertTrue(login.isPasswordDisplayed(), "Password không hiển thị");
+        softAssert.assertTrue(login.isLoginButtonDisplayed(), "Button Login không hiển thị");
+
+        softAssert.assertAll();
     }
 
     @DataProvider(name = "loginData")
@@ -39,6 +57,9 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(dataProvider = "loginData")
+    @Story("Login với nhiều bộ dữ liệu")
+    @Severity(SeverityLevel.BLOCKER)
+    @Description("Kiểm thử Login với data từ Excel bao gồm cả trường hợp pass và fail")
     public void testLogin(Map<String, String> rowData) {
         String userName = rowData.get("UserName");
         String passWord = rowData.get("PassWord");
@@ -46,20 +67,18 @@ public class LoginTest extends BaseTest {
         String errorMsg = rowData.get("ExpectedErrorMessage");
 
         fillLoginData(userName, passWord);
-        loginAction.clickLogin();
+        login.clickLogin();
 
         if ("success".equals(expectedResult)) {
-            Assert.assertEquals(driver.getCurrentUrl(), "https://www.saucedemo.com/inventory.html", "Login failed unexpectedly!");
-            Assert.assertTrue(loginAction.isLogoDisplayed(), "Logo is not displayed");
-          Assert.assertTrue(loginAction.getInventoryItemCount() > 0, "Inventory is empty after successful login");
+            Assert.assertEquals(driver.getCurrentUrl(), "https://www.saucedemo.com/inventory.html", "Login không thành công");
+            Assert.assertTrue(login.getInventoryItemCount() > 0, "Inventory trống sau khi Login thành công");
 
         } else if ("failure".equals(expectedResult)) {
-
-            WebElement error = loginAction.getErrorMessage();
-            Assert.assertTrue(error.isDisplayed(), "Error message not displayed for invalid login");
-            Assert.assertTrue(error.getText().contains(errorMsg), "Incorrect error message displayed");
+            WebElement error = login.getErrorMessage();
+            Assert.assertTrue(error.isDisplayed(), "Thông báo lỗi không hiển thị sau khi Login không hợp lệ");
+            Assert.assertTrue(error.getText().contains(errorMsg), "Thông báo lỗi hiển thị sai nội dung");
         } else {
-            Assert.fail("Invalid test data: ExpectedResult must be either 'success' or 'failure'");
+            Assert.fail("Dữ liệu test không hợp lệ: ExpectedResult phải là 'success' hoặc 'failure'");
         }
     }
 }

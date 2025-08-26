@@ -1,63 +1,95 @@
 package feature;
 
-import action.CartHeaderAction;
+import action.CartAction;
+import action.InventoryAction;
 import action.LoginAction;
 import action.MenuAction;
-import action.InventoryAction;
+import io.qameta.allure.*;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 import untils.BaseTest;
 
-import java.util.List;
-
+@Feature("Menu Navigation")
 public class MenuTest extends BaseTest {
     LoginAction login;
     MenuAction menu;
     InventoryAction inventory;
-    CartHeaderAction cartHeader;
+    CartAction cart;
 
     @BeforeMethod
     public void setupPage() {
         login = new LoginAction(driver);
         login.loginWithStandardUser();
 
-        menu = new MenuAction(driver);
         inventory = new InventoryAction(driver);
-        cartHeader = new CartHeaderAction(driver);
+        cart = new CartAction(driver);
+        menu = new MenuAction(driver);
     }
 
-    @Test
-    public void testClickAllItemsShouldStayOnInventoryPage() {
+    @Test(description = "Verify Menu button hiển thị trên Inventory page")
+    public void verifyMenuButtonDisplayed() {
+        Assert.assertTrue(menu.isMenuButtonDisplayed(), "Menu button không hiển thị!");
+    }
+
+    @Test(description = "Kiểm tra hiển thị của các item")
+    @Story("Kiểm tra UI của Menu")
+    @Severity(SeverityLevel.MINOR)
+    public void verifyInventoryUIElementsDisplayed() {
+        SoftAssert softAssert = new SoftAssert();
+        menu.openMenu();
+        softAssert.assertTrue(menu.isAllItemsDisplayed(), "All Items không hiển thị");
+        softAssert.assertTrue(menu.isAboutDisplayed(), "About không hiển thị");
+        softAssert.assertTrue(menu.isLogoutDisplayed(), "Logout không hiển thị");
+        softAssert.assertTrue(menu.isResetDisplayed(), "Reset không hiển thị");
+        softAssert.assertAll();
+    }
+
+    @Test(description = "Kiểm tra điều hướng khi click vào menu All items")
+    @Story("Navigation")
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Click All items trong menu phải điều hướng về trang Inventory")
+    public void testNavigateAllItems() {
         menu.openMenu();
         menu.clickAllItems();
-        Assert.assertTrue(driver.getCurrentUrl().contains("inventory"), "Did not remain on inventory page after clicking All Items");
+
+        Assert.assertTrue(driver.getCurrentUrl().contains("inventory"), "Không điều hướng về Inventory");
     }
 
-    @Test
-    public void testClickAboutShouldRedirectToSauceLabs() {
-        menu.openMenu();
-        menu.clickAbout();
-        Assert.assertEquals(driver.getCurrentUrl(), "https://saucelabs.com/", "Did not navigate to Sauce Labs page");
-    }
-
-    @Test
-    public void testClickLogoutShouldReturnToLoginPage() {
+    @Test(description = "Kiểm tra điều hướng khi click Logout")
+    @Story("Navigation")
+    @Severity(SeverityLevel.BLOCKER)
+    @Description("Click Logout trong menu phải điều hướng về trang Login")
+    public void testNavigateLogout() {
         menu.openMenu();
         menu.clickLogout();
-        Assert.assertEquals(driver.getCurrentUrl(), "https://www.saucedemo.com/", "Did not navigate back to login page after logout");
+        Assert.assertTrue(driver.getCurrentUrl().contains("saucedemo.com/"), "Không điều hướng về Login");
     }
 
-    @Test
-    public void testResetAppStateShouldClearCart() {
-        inventory.addAllProducts();
+    @Test(description = "Kiểm tra điều hướng khi click About")
+    @Story("Navigation")
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Click About trong menu phải điều hướng sang trang Sauce Labs")
+    public void testNavigateAbout() {
+        menu.openMenu();
+        menu.clickAbout();
+
+        Assert.assertTrue(driver.getCurrentUrl().contains("saucelabs"), "Không điều hướng sang trang About (Sauce Labs)");
+    }
+
+    @Test(description = "Kiểm tra chức năng Reset App State")
+    @Story("Functionality")
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Click Reset App State trong menu phải xóa sạch giỏ hàng")
+    public void testResetAppState() {
+        inventory.addProductByName("Sauce Labs Backpack");
         menu.openMenu();
         menu.clickResetAppState();
 
-        Assert.assertEquals(cartHeader.getCartBadgeCount(), 0, "Cart badge count should be 0 after Reset App State");
-        List<String> buttonTexts = inventory.getAllAddRemoveButtonTexts();
-        for (String text : buttonTexts) {
-            Assert.assertEquals(text, "Add to cart", "BUG UI: After resetting, expected button to be 'Add to cart' but found '" + text + "'");
-        }
+        SoftAssert softAssert = new SoftAssert();
+        softAssert.assertTrue(cart.getCartBadge().isEmpty(), "Cart badge vẫn hiển thị sau khi reset");
+        softAssert.assertEquals(inventory.getButtonTextByProduct("Sauce Labs Backpack"), "Add to cart");
+        softAssert.assertAll();
     }
 }

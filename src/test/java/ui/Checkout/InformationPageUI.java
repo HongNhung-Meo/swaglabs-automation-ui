@@ -1,8 +1,8 @@
-package ui;
+package ui.Checkout;
 
 import org.openqa.selenium.By;
 
-public class CheckoutInformationPage {
+public class InformationPageUI {
     public static final By PAGE_TITLE = By.className("title");
 
     public static final By FIRST_NAME = By.id("first-name");

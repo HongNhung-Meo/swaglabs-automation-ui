@@ -41,10 +41,33 @@
             <version>7.9.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- Allure TestNG -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>2.27.0</version> <!-- Tương thích tốt với TestNG 7.x -->
+        </dependency>
+
+        <!-- WebDriverManager -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.9.2</version> <!-- Hỗ trợ Selenium 4.x -->
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Plugin Allure -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.15.2</version> <!-- phiên bản plugin -->
+                <configuration>
+                    <reportVersion>2.20.1</reportVersion> <!-- phiên bản report -->
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>

@@ -2,7 +2,7 @@ package action;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import ui.LoginPage;
+import ui.LoginPageUI;
 
 public class LoginAction {
     WebDriver driver;
@@ -11,28 +11,40 @@ public class LoginAction {
         this.driver = driver;
     }
 
+    public boolean isUsernameDisplayed() {
+        return driver.findElement(LoginPageUI.USERNAME_FIELD).isDisplayed();
+    }
+
+    public boolean isPasswordDisplayed() {
+        return driver.findElement(LoginPageUI.USERNAME_FIELD).isDisplayed();
+    }
+
+    public boolean isLoginButtonDisplayed() {
+        return driver.findElement(LoginPageUI.LOGIN_BUTTON).isDisplayed();
+    }
+
     public void enterUsername(String username) {
-        driver.findElement(LoginPage.USERNAME_FIELD).sendKeys(username);
+        driver.findElement(LoginPageUI.USERNAME_FIELD).sendKeys(username);
     }
 
     public void enterPassword(String password) {
-        driver.findElement(LoginPage.PASSWORD_FIELD).sendKeys(password);
+        driver.findElement(LoginPageUI.PASSWORD_FIELD).sendKeys(password);
     }
 
     public void clickLogin() {
-        driver.findElement(LoginPage.LOGIN_BUTTON).click();
+        driver.findElement(LoginPageUI.LOGIN_BUTTON).click();
     }
 
     public WebElement getErrorMessage() {
-        return driver.findElement(LoginPage.ERROR_MESSAGE);
+        return driver.findElement(LoginPageUI.ERROR_MESSAGE);
     }
 
     public boolean isLogoDisplayed() {
-        return driver.findElement(LoginPage.APP_LOGO).isDisplayed();
+        return driver.findElement(LoginPageUI.APP_LOGO).isDisplayed();
     }
 
     public int getInventoryItemCount() {
-        return driver.findElements(LoginPage.INVENTORY_ITEM).size();
+        return driver.findElements(LoginPageUI.INVENTORY_ITEM).size();
     }
 
     public void loginWithStandardUser() {
